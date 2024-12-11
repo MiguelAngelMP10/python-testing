@@ -27,6 +27,7 @@ class BankAccount:
 
     def transfer(self, amount, target):
         if self.balance < amount:
+            self._log_transaction("No hay fondos suficientes")
             raise ValueError("No hay fondos suficientes")
         self.withdraw(amount)
         target.deposit(amount)
