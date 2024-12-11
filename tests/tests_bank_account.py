@@ -1,4 +1,4 @@
-import unittest
+import unittest, os
 
 from src.bank_account import BankAccount
 
@@ -6,7 +6,15 @@ from src.bank_account import BankAccount
 class BankAccountTests(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.account = BankAccount(balance=1000)
+        self.account = BankAccount(balance=1000, log_file="transaction_log.txt")
+
+    def tearDown(self) -> None:
+        if os.path.exists(self.account.log_file):
+            os.remove(self.account.log_file)
+
+    def _count_lines(self, filename):
+        with open(filename, "r") as f:
+            return len(f.readlines())
 
     def test_deposit(self):
         new_balance = self.account.deposit(500)
@@ -30,3 +38,12 @@ class BankAccountTests(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.account.transfer(2000, target)
         self.assertEqual(str(context.exception), "No hay fondos suficientes")
+
+    def test_transaction_log(self):
+        self.account.deposit(500)
+        assert os.path.exists("transaction_log.txt")
+
+    def test_count_transactions(self):
+        assert self._count_lines(self.account.log_file) == 1
+        self.account.deposit(500)
+        assert self._count_lines(self.account.log_file) == 2
