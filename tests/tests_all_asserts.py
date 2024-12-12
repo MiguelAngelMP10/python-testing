@@ -1,5 +1,6 @@
 import unittest
 
+SERVER="server_b"
 
 class AllAssertsTests(unittest.TestCase):
 
@@ -29,3 +30,15 @@ class AllAssertsTests(unittest.TestCase):
             {1, 2, 3},
             {1, 2, 3}
         )
+
+    @unittest.skip("Trabjo en progreso, será habilitada nuevamente")
+    def test_skip(self):
+        self.assertEqual("hola", "chao")
+
+    @unittest.skipIf(SERVER == "server_b", "Saltado porque no estamos en el servidor")
+    def test_skip_if(self):
+        self.assertEqual(100, 100)
+
+    @unittest.expectedFailure
+    def test_expected_failure(self):
+        self.assertEqual(100, 150)
