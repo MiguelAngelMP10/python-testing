@@ -2,7 +2,7 @@ import unittest, os
 from datetime import datetime
 from unittest.mock import patch
 from src.bank_account import BankAccount
-from src.exceptions import WithdrawalTimeRestrictionError
+from src.exceptions import WithdrawalTimeRestrictionError, InsufficientFundsError
 
 
 class BankAccountTests(unittest.TestCase):
@@ -77,3 +77,24 @@ class BankAccountTests(unittest.TestCase):
                 self.account = BankAccount(balance=1000, log_file="transaction_log.txt")
                 new_balance = self.account.deposit(case["amount"])
                 self.assertEqual(new_balance, case["expected"])
+
+    def test_deposit_invalid_amount(self):
+        new_balance = self.account.deposit(-500)
+        self.assertEqual(new_balance, 1000, "El balance no debe cambiar con un monto negativo")
+
+        new_balance = self.account.deposit(0)
+        self.assertEqual(new_balance, 1000, "El balance no debe cambiar con un monto de cero")
+
+    @patch("src.bank_account.datetime")
+    def test_insufficient_funds(self, mock_datetime):
+        mock_datetime.now.return_value = datetime(2024, 1, 1, 10, 0)  # Fecha ficticia con hora 10 AM
+
+        # Intentar retirar más de lo que hay en la cuenta (por ejemplo, 1500)
+        with self.assertRaises(InsufficientFundsError) as context:
+            self.account.withdraw(10000)
+
+        # Verificar que el mensaje de la excepción sea el esperado
+        self.assertEqual(
+            str(context.exception),
+            "Withdrawal of 10000 exceeds balance 1000"
+        )
