@@ -22,15 +22,18 @@ class BankAccountTests(unittest.TestCase):
         new_balance = self.account.deposit(500)
         self.assertEqual(new_balance, 1500, "El balance no es igual")
 
-    def test_withdraw(self):
+    @patch("src.bank_account.datetime")
+    def test_withdraw(self, mock_datetime):
+        mock_datetime.now.return_value = datetime(2024, 1, 1, 10, 0)  # Fecha ficticia con hora 10 AM
         new_balance = self.account.withdraw(200)
-        print(new_balance)
         self.assertEqual(new_balance, 800, "El balance no es igual")
 
     def test_get_balance(self):
         self.assertEqual(self.account.get_balance(), 1000)
 
-    def test_success_transfer(self):
+    @patch("src.bank_account.datetime")
+    def test_success_transfer(self, mock_datetime):
+        mock_datetime.now.return_value = datetime(2024, 1, 1, 10, 0)  # Fecha ficticia con hora 10 AM
         target = BankAccount(balance=500)
         self.account.transfer(200, target)
         self.assertEqual(self.account.get_balance(), 800)
@@ -71,6 +74,6 @@ class BankAccountTests(unittest.TestCase):
         ]
         for case in test_cases:
             with self.subTest(case=case["amount"]):
-                self.account =  BankAccount(balance=1000, log_file="transaction_log.txt")
+                self.account = BankAccount(balance=1000, log_file="transaction_log.txt")
                 new_balance = self.account.deposit(case["amount"])
                 self.assertEqual(new_balance, case["expected"])
